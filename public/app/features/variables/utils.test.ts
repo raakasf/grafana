@@ -5,13 +5,28 @@ const explore = require('../../core/utils/explore');
 
 describe('containsVariable', () => {
   it.each`
-    args      | expected
-    ${[null]} | ${false}
-  `("when called with params: 'variable': '$variable' then result should be '$expected'", ({ args, expected }) => {
+    args                                                                 | expected
+    ${['this is a ${variable}']}                                         | ${true}
+    ${[{ attribute1: { attribute11: 'this is also a ${variable}' } }]}   | ${true}
+    ${['this is also a $variable']}                                      | ${true}
+    ${[{ attribute1: { attribute11: 'this is also a $variable' } }]}     | ${true}
+    ${['this is also a ${__variable}']}                                  | ${true}
+    ${[{ attribute1: { attribute11: 'this is also a ${__variable}' } }]} | ${true}
+    ${['this is also  a [[variable]]']}                                  | ${true}
+    ${[{ attribute1: { attribute11: 'this is also  [[variable]]' } }]}   | ${true}
+  `("when called with params: 'variable': '$args' then result should be '$expected'", ({ args, expected }) => {
     const spy = jest.spyOn(explore, 'safeStringifyValue');
     expect(containsVariable(args)).toEqual(expected);
     expect(spy).toBeCalled();
-    expect(spy).toBeCalledTimes(1);
+  });
+  it.each`
+    args                        | expected
+    ${[null]}                   | ${false}
+    ${['there is no variable']} | ${false}
+  `("when called without params: 'variable': '$variable' then result should be '$expected'", ({ args, expected }) => {
+    const spy = jest.spyOn(explore, 'safeStringifyValue');
+    expect(containsVariable(args)).toEqual(expected);
+    expect(spy).toBeCalled();
   });
 });
 
